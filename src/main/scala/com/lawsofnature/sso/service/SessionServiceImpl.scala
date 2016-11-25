@@ -8,7 +8,6 @@ import RpcSSO.{LoginRequest, SessionResponse, _SSOServiceEndpointDisp}
 /**
   * Created by fangzhongwei on 2016/11/23.
   */
-
 class SessionServiceEndpointImpl @Inject()(sessionService: SessionService) extends _SSOServiceEndpointDisp {
   override def login(traceId: String, loginRequest: LoginRequest, current: Current): SessionResponse = sessionService.login(traceId, loginRequest)
 
