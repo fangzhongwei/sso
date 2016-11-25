@@ -10,7 +10,7 @@ import RpcSSO.{LoginRequest, SessionResponse, _SSOServiceEndpointDisp}
   */
 
 class SessionServiceEndpointImpl @Inject()(sessionService: SessionService) extends _SSOServiceEndpointDisp {
-  override def touch(traceId: String, token: String, current: Current): SessionResponse = sessionService.touch(traceId, token)
-
   override def login(traceId: String, loginRequest: LoginRequest, current: Current): SessionResponse = sessionService.login(traceId, loginRequest)
+
+  override def touch(traceId: String, token: String, current: Current): SessionResponse = sessionService.touch(traceId, token)
 }
