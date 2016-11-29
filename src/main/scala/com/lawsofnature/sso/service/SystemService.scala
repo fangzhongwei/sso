@@ -5,9 +5,10 @@ import java.util
 import Ice.ObjectImpl
 import com.google.inject.name.Names
 import com.google.inject.{AbstractModule, Guice}
-import com.lawsofnatrue.common.ice.{ConfigHelper, IceServerTemplate, IceServerTemplateImpl}
+import com.lawsofnatrue.common.ice._
 import com.lawsofnature.common.redis.{RedisClientTemplate, RedisClientTemplateImpl}
 import com.lawsofnature.member.client.{MemberClientService, MemberClientServiceImpl}
+import com.lawsofnature.sso.repo.{SessionRepository, SessionRepositoryImpl}
 
 
 object SystemService extends App {
@@ -16,6 +17,8 @@ object SystemService extends App {
     override def configure() {
       val map: util.HashMap[String, String] = ConfigHelper.configMap
       Names.bindProperties(binder(), map)
+      bind(classOf[IcePrxFactory]).to(classOf[IcePrxFactoryImpl]).asEagerSingleton()
+      bind(classOf[SessionRepository]).to(classOf[SessionRepositoryImpl]).asEagerSingleton()
       bind(classOf[SessionService]).to(classOf[SessionServiceImpl]).asEagerSingleton()
       bind(classOf[RedisClientTemplate]).to(classOf[RedisClientTemplateImpl]).asEagerSingleton()
       bind(classOf[MemberClientService]).to(classOf[MemberClientServiceImpl]).asEagerSingleton()
@@ -26,5 +29,6 @@ object SystemService extends App {
 
   injector.getInstance(classOf[MemberClientService]).initClient
   injector.getInstance(classOf[RedisClientTemplate]).init
+  injector.getInstance(classOf[IceServerTemplate]).startServer
 
 }
