@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import RpcMember.{BaseResponse, MemberResponse}
 import RpcSSO.{LoginRequest, SessionResponse}
-import com.lawsofnature.common.exception.ServiceErrorCode
+import com.lawsofnature.common.exception.ErrorCode
 import com.lawsofnature.common.helper.{IPv4Helper, TokenHelper}
 import com.lawsofnature.common.redis.RedisClientTemplate
 import com.lawsofnature.member.client.MemberClientService
@@ -42,7 +42,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     val memberResponse: MemberResponse = memberClientService.getMemberByIdentity(traceId, request.identity)
     memberResponse.success match {
       case false =>
-        SessionResponse.makeErrorResponse(ServiceErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.id)
+        SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.getCode)
       case true =>
         memberResponse.status match {
           case 1 =>
@@ -56,10 +56,10 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
                 sessionRepository.createSession(tmSessionRow)
                 new SessionResponse(true, 0, tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime)
               case false =>
-                SessionResponse.makeErrorResponse(ServiceErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.id)
+                SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.getCode)
             }
           case _ =>
-            SessionResponse.makeErrorResponse(ServiceErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE.id)
+            SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE.getCode)
         }
     }
   }
@@ -115,8 +115,8 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
         sessionCache
       case None =>
         Await.result(redisClientTemplate.getString(generateRepelledTokenCacheKey(token)), timeout) match {
-          case Some(v) => SessionResponse.makeErrorResponse(ServiceErrorCode.EC_SSO_SESSION_REPELLED.id)
-          case None => SessionResponse.makeErrorResponse(ServiceErrorCode.EC_SSO_SESSION_EXPIRED.id)
+          case Some(v) => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_REPELLED.getCode)
+          case None => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED.getCode)
         }
     }
   }
