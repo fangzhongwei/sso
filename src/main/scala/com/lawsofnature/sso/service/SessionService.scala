@@ -11,6 +11,7 @@ import com.lawsofnature.common.redis.RedisClientTemplate
 import com.lawsofnature.member.client.MemberClientService
 import com.lawsofnature.sso.domain.SessionCache
 import com.lawsofnature.sso.repo.{SessionRepository, TmSessionRow}
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -29,6 +30,7 @@ trait SessionService {
 }
 
 class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisClientTemplate: RedisClientTemplate, memberClientService: MemberClientService) extends SessionService {
+  val logger: Logger = LoggerFactory.getLogger(getClass)
   implicit val timeout = (90 seconds)
   val sessionExpireSeconds: Int = 8 * 60 * 60
   val repelledTokenExpireSeconds: Int = 60 * 60
@@ -37,11 +39,13 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
   val MEMBER_ID_TOKEN_PRE = "sso:mi-tk:"
   val REPELLED_TOKEN_PRE = "sso:rptk:"
 
+  var ERROR_RESPONSE_MAP: scala.collection.mutable.Map[ErrorCode, SessionResponse] = scala.collection.mutable.Map[ErrorCode, SessionResponse]()
+
   override def login(traceId: String, request: LoginRequest): SessionResponse = {
     val memberResponse: MemberResponse = memberClientService.getMemberByIdentity(traceId, request.identity)
     memberResponse.success match {
       case false =>
-        SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.getCode)
+        errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
       case true =>
         memberResponse.status match {
           case 1 =>
@@ -55,11 +59,24 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
                 sessionRepository.createSession(tmSessionRow)
                 new SessionResponse(true, 0, tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime)
               case false =>
-                SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD.getCode)
+                logger.info("invalid username or password.")
+                errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
             }
           case _ =>
-            SessionResponse.makeErrorResponse(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE.getCode)
+            errorResponse(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE)
         }
+    }
+  }
+
+  def errorResponse(errorCode: ErrorCode): SessionResponse = {
+    ERROR_RESPONSE_MAP.get(errorCode) match {
+      case Some(sessionResponse) => sessionResponse
+      case None =>
+        val response: SessionResponse = new SessionResponse()
+        response.success = false
+        response.code = errorCode.getCode
+        ERROR_RESPONSE_MAP += (errorCode -> response)
+        response
     }
   }
 
@@ -115,8 +132,8 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
         sessionCache
       case None =>
         redisClientTemplate.getString(generateRepelledTokenCacheKey(token)) match {
-          case Some(v) => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_REPELLED.getCode)
-          case None => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED.getCode)
+          case Some(v) => errorResponse(ErrorCode.EC_SSO_SESSION_REPELLED)
+          case None => errorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED)
         }
     }
   }

@@ -7,6 +7,7 @@ scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
   "commons-lang" % "commons-lang" % "2.6",
+  "com.zeroc" % "ice" % "3.6.2",
   "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.4",
   "com.typesafe.slick" % "slick-codegen_2.11" % "3.2.0-M1" % "test"
 )
