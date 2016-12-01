@@ -13,7 +13,6 @@ import com.lawsofnature.sso.domain.SessionCache
 import com.lawsofnature.sso.repo.{SessionRepository, TmSessionRow}
 
 import scala.concurrent.Await
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 
 /**
@@ -66,7 +65,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
 
   def saveCache(token: String, sessionCache: SessionCache) = {
     val memberIdKey: String = generateMemberIdTokenCacheKey(sessionCache.memberId, sessionCache.clientId)
-    redisClientTemplate.getString(memberIdKey) onSuccess {
+    redisClientTemplate.getString(memberIdKey) match {
       case Some(existingToken) => saveSession2Cache(token, sessionCache, Some(existingToken))
       case None => saveSession2Cache(token, sessionCache, None)
     }
@@ -75,6 +74,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
   def saveSession2Cache(token: String, sessionCache: SessionCache, existedToken: Option[String]) = {
     existedToken match {
       case Some(tk) => redisClientTemplate.setString(generateRepelledTokenCacheKey(tk), "1", repelledTokenExpireSeconds)
+      case None =>
     }
     redisClientTemplate.setString(generateMemberIdTokenCacheKey(sessionCache.memberId, sessionCache.clientId), token, sessionExpireSeconds)
     redisClientTemplate.set(generateTokenSessionCacheKey(token), sessionCache, sessionExpireSeconds)
@@ -108,13 +108,13 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
 
   override def touch(traceId: String, token: String): SessionResponse = {
     val sessionCacheKey: String = generateTokenSessionCacheKey(token)
-    Await.result(redisClientTemplate.get[SessionCache](sessionCacheKey, classOf[SessionCache]), timeout) match {
+    redisClientTemplate.get[SessionCache](sessionCacheKey, classOf[SessionCache]) match {
       case Some(sessionCache) =>
         sessionCache.lastAccessTime = System.currentTimeMillis()
         redisClientTemplate.set(sessionCacheKey, sessionCacheKey, sessionExpireSeconds)
         sessionCache
       case None =>
-        Await.result(redisClientTemplate.getString(generateRepelledTokenCacheKey(token)), timeout) match {
+        redisClientTemplate.getString(generateRepelledTokenCacheKey(token)) match {
           case Some(v) => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_REPELLED.getCode)
           case None => SessionResponse.makeErrorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED.getCode)
         }
