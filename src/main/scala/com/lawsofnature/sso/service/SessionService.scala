@@ -4,7 +4,7 @@ import java.sql.Timestamp
 import javax.inject.Inject
 
 import RpcMember.{BaseResponse, MemberResponse}
-import RpcSSO.{LoginRequest, SessionResponse}
+import RpcSSO.{LoginRequest, SSOBaseResponse, SessionResponse}
 import com.lawsofnature.common.exception.ErrorCode
 import com.lawsofnature.common.helper.{IPv4Helper, RegHelper, TokenHelper}
 import com.lawsofnature.common.redis.RedisClientTemplate
@@ -13,13 +13,16 @@ import com.lawsofnature.sso.domain.SessionCache
 import com.lawsofnature.sso.repo.{SessionRepository, TmSessionRow}
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.concurrent.Await
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.{Await, Future, Promise}
 
 /**
   * Created by fangzhongwei on 2016/11/23.
   */
 trait SessionService {
+  def logout(traceId: String, token: String): SSOBaseResponse
+
   def login(traceId: String, loginRequest: LoginRequest): SessionResponse
 
   def touch(traceId: String, token: String): SessionResponse
@@ -43,6 +46,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
 
   /**
     * find by identity first, if not found, find by username
+    *
     * @param traceId
     * @param request
     * @return
@@ -51,7 +55,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     var memberResponse: MemberResponse = memberClientService.getMemberByIdentity(traceId, request.identity)
     memberResponse.success match {
       case false => memberResponse.code match {
-      //ErrorCode.EC_UC_MEMBER_NOT_EXISTS.getCode
+        //ErrorCode.EC_UC_MEMBER_NOT_EXISTS.getCode
         case 10001010 =>
           memberResponse = memberClientService.getMemberByUsername(traceId, request.identity)
           memberResponse.success match {
@@ -146,12 +150,37 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     new StringBuilder(TokenHelper.generate8HexToken).append(sessionId.toString).toString()
   }
 
+  def doLogout(traceId: String, token: String): Future[Unit] = {
+    val promise: Promise[Unit] = Promise[Unit]()
+    Future {
+      val tokenSessionCacheKey: String = generateTokenSessionCacheKey(token)
+      redisClientTemplate.get[SessionCache](tokenSessionCacheKey, classOf[SessionCache]) match {
+        case Some(sessionCache) =>
+          try {
+            redisClientTemplate.delete(tokenSessionCacheKey)
+            redisClientTemplate.delete(generateMemberIdTokenCacheKey(sessionCache.memberId, sessionCache.clientId))
+            sessionRepository.updateSession(token, 99.toByte)
+            promise.success()
+          } catch {
+            case ex: Exception => logger.error(traceId, ex)
+          }
+        case None => promise.success()
+      }
+    }
+    promise.future
+  }
+
+  override def logout(traceId: String, token: String): SSOBaseResponse = {
+    doLogout(traceId, token)
+    new SSOBaseResponse(true, 0)
+  }
+
   override def touch(traceId: String, token: String): SessionResponse = {
     val sessionCacheKey: String = generateTokenSessionCacheKey(token)
     redisClientTemplate.get[SessionCache](sessionCacheKey, classOf[SessionCache]) match {
       case Some(sessionCache) =>
         sessionCache.lastAccessTime = System.currentTimeMillis()
-        redisClientTemplate.set(sessionCacheKey, sessionCacheKey, sessionExpireSeconds)
+        redisClientTemplate.set(sessionCacheKey, sessionCache, sessionExpireSeconds)
         sessionCache
       case None =>
         redisClientTemplate.getString(generateRepelledTokenCacheKey(token)) match {

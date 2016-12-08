@@ -15,13 +15,14 @@ import com.lawsofnature.connection.MySQLDBImpl
   *  @param deviceIdenitty Database column device_idenitty SqlType(VARCHAR), Length(128,true)
   *  @param lat Database column lat SqlType(VARCHAR), Length(32,true)
   *  @param lng Database column lng SqlType(VARCHAR), Length(32,true)
-  *  @param country Database column country SqlType(VARCHAR), Length(16,true), Default(None)
-  *  @param province Database column province SqlType(VARCHAR), Length(16,true), Default(None)
-  *  @param city Database column city SqlType(VARCHAR), Length(16,true), Default(None)
-  *  @param county Database column county SqlType(VARCHAR), Length(16,true), Default(None)
-  *  @param address Database column address SqlType(VARCHAR), Length(256,true), Default(None)
-  *  @param gmtCreate Database column gmt_create SqlType(TIMESTAMP) */
-case class TmSessionRow(token: String, salt: String, status: Byte = 0, clientId: Byte, memberId: Long, identity: String, identityType: Byte, ip: Long, deviceType: Byte, deviceIdenitty: String, lat: String, lng: String, country: Option[String] = None, province: Option[String] = None, city: Option[String] = None, county: Option[String] = None, address: Option[String] = None, gmtCreate: java.sql.Timestamp)
+  *  @param country Database column country SqlType(VARCHAR), Length(16,true), Default(Some())
+  *  @param province Database column province SqlType(VARCHAR), Length(16,true), Default(Some())
+  *  @param city Database column city SqlType(VARCHAR), Length(16,true), Default(Some())
+  *  @param county Database column county SqlType(VARCHAR), Length(16,true), Default(Some())
+  *  @param address Database column address SqlType(VARCHAR), Length(256,true), Default(Some())
+  *  @param gmtCreate Database column gmt_create SqlType(TIMESTAMP)
+  *  @param gmtUpdate Database column gmt_update SqlType(TIMESTAMP), Default(None) */
+case class TmSessionRow(token: String, salt: String, status: Byte = 0, clientId: Byte, memberId: Long, identity: String, identityType: Byte, ip: Long, deviceType: Byte, deviceIdenitty: String, lat: String, lng: String, country: Option[String] = Some(""), province: Option[String] = Some(""), city: Option[String] = Some(""), county: Option[String] = Some(""), address: Option[String] = Some(""), gmtCreate: java.sql.Timestamp, gmtUpdate: Option[java.sql.Timestamp] = None)
 
 /** Slick data model trait for extension, choice of backend or usage in the cake pattern. (Make sure to initialize this late.) */
 trait Tables extends MySQLDBImpl{
@@ -31,20 +32,20 @@ trait Tables extends MySQLDBImpl{
   import slick.jdbc.{GetResult => GR}
 
   /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = TmSession.schema ++ TSequence.schema
+  lazy val schema: profile.SchemaDescription = TmSession.schema
   @deprecated("Use .schema instead of .ddl", "3.0")
   def ddl = schema
 
   /** GetResult implicit for fetching TmSessionRow objects using plain SQL queries */
-  implicit def GetResultTmSessionRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[Long], e3: GR[Option[String]], e4: GR[java.sql.Timestamp]): GR[TmSessionRow] = GR{
+  implicit def GetResultTmSessionRow(implicit e0: GR[String], e1: GR[Byte], e2: GR[Long], e3: GR[Option[String]], e4: GR[java.sql.Timestamp], e5: GR[Option[java.sql.Timestamp]]): GR[TmSessionRow] = GR{
     prs => import prs._
-    TmSessionRow.tupled((<<[String], <<[String], <<[Byte], <<[Byte], <<[Long], <<[String], <<[Byte], <<[Long], <<[Byte], <<[String], <<[String], <<[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<[java.sql.Timestamp]))
+      TmSessionRow.tupled((<<[String], <<[String], <<[Byte], <<[Byte], <<[Long], <<[String], <<[Byte], <<[Long], <<[Byte], <<[String], <<[String], <<[String], <<?[String], <<?[String], <<?[String], <<?[String], <<?[String], <<[java.sql.Timestamp], <<?[java.sql.Timestamp]))
   }
   /** Table description of table tm_session. Objects of this class serve as prototypes for rows in queries. */
   class TmSession(_tableTag: Tag) extends profile.api.Table[TmSessionRow](_tableTag, "tm_session") {
-    def * = (token, salt, status, clientId, memberId, identity, identityType, ip, deviceType, deviceIdenitty, lat, lng, country, province, city, county, address, gmtCreate) <> (TmSessionRow.tupled, TmSessionRow.unapply)
+    def * = (token, salt, status, clientId, memberId, identity, identityType, ip, deviceType, deviceIdenitty, lat, lng, country, province, city, county, address, gmtCreate, gmtUpdate) <> (TmSessionRow.tupled, TmSessionRow.unapply)
     /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(token), Rep.Some(salt), Rep.Some(status), Rep.Some(clientId), Rep.Some(memberId), Rep.Some(identity), Rep.Some(identityType), Rep.Some(ip), Rep.Some(deviceType), Rep.Some(deviceIdenitty), Rep.Some(lat), Rep.Some(lng), country, province, city, county, address, Rep.Some(gmtCreate)).shaped.<>({r=>import r._; _1.map(_=> TmSessionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11.get, _12.get, _13, _14, _15, _16, _17, _18.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
+    def ? = (Rep.Some(token), Rep.Some(salt), Rep.Some(status), Rep.Some(clientId), Rep.Some(memberId), Rep.Some(identity), Rep.Some(identityType), Rep.Some(ip), Rep.Some(deviceType), Rep.Some(deviceIdenitty), Rep.Some(lat), Rep.Some(lng), country, province, city, county, address, Rep.Some(gmtCreate), gmtUpdate).shaped.<>({r=>import r._; _1.map(_=> TmSessionRow.tupled((_1.get, _2.get, _3.get, _4.get, _5.get, _6.get, _7.get, _8.get, _9.get, _10.get, _11.get, _12.get, _13, _14, _15, _16, _17, _18.get, _19)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
 
     /** Database column token SqlType(VARCHAR), PrimaryKey, Length(32,true) */
     val token: Rep[String] = column[String]("token", O.PrimaryKey, O.Length(32,varying=true))
@@ -70,48 +71,21 @@ trait Tables extends MySQLDBImpl{
     val lat: Rep[String] = column[String]("lat", O.Length(32,varying=true))
     /** Database column lng SqlType(VARCHAR), Length(32,true) */
     val lng: Rep[String] = column[String]("lng", O.Length(32,varying=true))
-    /** Database column country SqlType(VARCHAR), Length(16,true), Default(None) */
-    val country: Rep[Option[String]] = column[Option[String]]("country", O.Length(16,varying=true), O.Default(None))
-    /** Database column province SqlType(VARCHAR), Length(16,true), Default(None) */
-    val province: Rep[Option[String]] = column[Option[String]]("province", O.Length(16,varying=true), O.Default(None))
-    /** Database column city SqlType(VARCHAR), Length(16,true), Default(None) */
-    val city: Rep[Option[String]] = column[Option[String]]("city", O.Length(16,varying=true), O.Default(None))
-    /** Database column county SqlType(VARCHAR), Length(16,true), Default(None) */
-    val county: Rep[Option[String]] = column[Option[String]]("county", O.Length(16,varying=true), O.Default(None))
-    /** Database column address SqlType(VARCHAR), Length(256,true), Default(None) */
-    val address: Rep[Option[String]] = column[Option[String]]("address", O.Length(256,varying=true), O.Default(None))
+    /** Database column country SqlType(VARCHAR), Length(16,true), Default(Some()) */
+    val country: Rep[Option[String]] = column[Option[String]]("country", O.Length(16,varying=true), O.Default(Some("")))
+    /** Database column province SqlType(VARCHAR), Length(16,true), Default(Some()) */
+    val province: Rep[Option[String]] = column[Option[String]]("province", O.Length(16,varying=true), O.Default(Some("")))
+    /** Database column city SqlType(VARCHAR), Length(16,true), Default(Some()) */
+    val city: Rep[Option[String]] = column[Option[String]]("city", O.Length(16,varying=true), O.Default(Some("")))
+    /** Database column county SqlType(VARCHAR), Length(16,true), Default(Some()) */
+    val county: Rep[Option[String]] = column[Option[String]]("county", O.Length(16,varying=true), O.Default(Some("")))
+    /** Database column address SqlType(VARCHAR), Length(256,true), Default(Some()) */
+    val address: Rep[Option[String]] = column[Option[String]]("address", O.Length(256,varying=true), O.Default(Some("")))
     /** Database column gmt_create SqlType(TIMESTAMP) */
     val gmtCreate: Rep[java.sql.Timestamp] = column[java.sql.Timestamp]("gmt_create")
+    /** Database column gmt_update SqlType(TIMESTAMP), Default(None) */
+    val gmtUpdate: Rep[Option[java.sql.Timestamp]] = column[Option[java.sql.Timestamp]]("gmt_update", O.Default(None))
   }
   /** Collection-like TableQuery object for table TmSession */
   lazy val TmSession = new TableQuery(tag => new TmSession(tag))
-
-  /** Entity class storing rows of table TSequence
-   *  @param name Database column name SqlType(VARCHAR), Length(64,true)
-   *  @param currentValue Database column current_value SqlType(BIGINT)
-   *  @param increment Database column increment SqlType(INT), Default(1) */
-  case class TSequenceRow(name: String, currentValue: Long, increment: Int = 1)
-  /** GetResult implicit for fetching TSequenceRow objects using plain SQL queries */
-  implicit def GetResultTSequenceRow(implicit e0: GR[String], e1: GR[Long], e2: GR[Int]): GR[TSequenceRow] = GR{
-    prs => import prs._
-    TSequenceRow.tupled((<<[String], <<[Long], <<[Int]))
-  }
-  /** Table description of table t_sequence. Objects of this class serve as prototypes for rows in queries. */
-  class TSequence(_tableTag: Tag) extends profile.api.Table[TSequenceRow](_tableTag, "t_sequence") {
-    def * = (name, currentValue, increment) <> (TSequenceRow.tupled, TSequenceRow.unapply)
-    /** Maps whole row to an option. Useful for outer joins. */
-    def ? = (Rep.Some(name), Rep.Some(currentValue), Rep.Some(increment)).shaped.<>({r=>import r._; _1.map(_=> TSequenceRow.tupled((_1.get, _2.get, _3.get)))}, (_:Any) =>  throw new Exception("Inserting into ? projection not supported."))
-
-    /** Database column name SqlType(VARCHAR), Length(64,true) */
-    val name: Rep[String] = column[String]("name", O.Length(64,varying=true))
-    /** Database column current_value SqlType(BIGINT) */
-    val currentValue: Rep[Long] = column[Long]("current_value")
-    /** Database column increment SqlType(INT), Default(1) */
-    val increment: Rep[Int] = column[Int]("increment", O.Default(1))
-
-    /** Uniqueness Index over (name) (database name uq_ts_n) */
-    val index1 = index("uq_ts_n", name, unique=true)
-  }
-  /** Collection-like TableQuery object for table TSequence */
-  lazy val TSequence = new TableQuery(tag => new TSequence(tag))
 }

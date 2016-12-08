@@ -30,5 +30,4 @@ object SystemService extends App {
   injector.getInstance(classOf[MemberClientService]).initClient
   injector.getInstance(classOf[RedisClientTemplate]).init
   injector.getInstance(classOf[IceServerTemplate]).startServer
-
 }
