@@ -20,9 +20,11 @@ trait SessionRepository extends Tables {
     TmSession.filter(_.token === token).result.headOption
   }
 
+  var i = -1
+
   def getNextSessionId():Future[Seq[(Long)]]={
-    val tab = System.currentTimeMillis() % 5
-    val sequenceName = "session_id_" + tab
+    i = i + 1
+    val sequenceName = "session_id_" + (i % 5)
     db.run(sql"""select nextval($sequenceName)""".as[(Long)])
   }
 }

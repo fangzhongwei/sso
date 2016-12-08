@@ -6,7 +6,7 @@ import javax.inject.Inject
 import RpcMember.{BaseResponse, MemberResponse}
 import RpcSSO.{LoginRequest, SessionResponse}
 import com.lawsofnature.common.exception.ErrorCode
-import com.lawsofnature.common.helper.{IPv4Helper, TokenHelper}
+import com.lawsofnature.common.helper.{IPv4Helper, RegHelper, TokenHelper}
 import com.lawsofnature.common.redis.RedisClientTemplate
 import com.lawsofnature.member.client.MemberClientService
 import com.lawsofnature.sso.domain.SessionCache
@@ -41,30 +41,51 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
 
   var ERROR_RESPONSE_MAP: scala.collection.mutable.Map[ErrorCode, SessionResponse] = scala.collection.mutable.Map[ErrorCode, SessionResponse]()
 
+  /**
+    * find by identity first, if not found, find by username
+    * @param traceId
+    * @param request
+    * @return
+    */
   override def login(traceId: String, request: LoginRequest): SessionResponse = {
-    val memberResponse: MemberResponse = memberClientService.getMemberByIdentity(traceId, request.identity)
+    var memberResponse: MemberResponse = memberClientService.getMemberByIdentity(traceId, request.identity)
     memberResponse.success match {
-      case false =>
-        errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
-      case true =>
-        memberResponse.status match {
-          case 1 =>
-            val checkPasswordResponse: BaseResponse = memberClientService.checkPassword(traceId, memberResponse.memberId, request.pwd)
-            checkPasswordResponse.success match {
-              case true =>
-                val token: String = generateToken
-                val tmSessionRow: TmSessionRow = TmSessionRow(token, TokenHelper.generate8HexToken, 0, request.clientId.toByte, memberResponse.memberId, request.identity, identityType(memberResponse, request.identity), IPv4Helper.ipToLong(request.ip), request.deviceType.toByte, request.deviceIdentity, request.lat, request.lng,
-                  Some(request.country), Some(request.province), Some(request.city), Some(request.county), Some(request.address), new Timestamp(System.currentTimeMillis()))
-                saveCache(token, new SessionCache(tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime))
-                sessionRepository.createSession(tmSessionRow)
-                new SessionResponse(true, 0, tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime)
-              case false =>
-                logger.info("invalid username or password.")
-                errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
-            }
-          case _ =>
-            errorResponse(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE)
+      case false => memberResponse.code match {
+      //ErrorCode.EC_UC_MEMBER_NOT_EXISTS.getCode
+        case 10001010 =>
+          memberResponse = memberClientService.getMemberByUsername(traceId, request.identity)
+          memberResponse.success match {
+            case false =>
+              memberResponse.code match {
+                case 10001010 => errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
+                case _ => errorResponse(ErrorCode.get(memberResponse.code))
+              }
+            case true => checkAndResponse(traceId, request, memberResponse)
+          }
+        case _ => errorResponse(ErrorCode.get(memberResponse.code))
+      }
+      case true => checkAndResponse(traceId, request, memberResponse)
+    }
+  }
+
+  def checkAndResponse(traceId: String, request: LoginRequest, memberResponse: MemberResponse): SessionResponse = {
+    memberResponse.status match {
+      case 1 =>
+        val checkPasswordResponse: BaseResponse = memberClientService.checkPassword(traceId, memberResponse.memberId, request.pwd)
+        checkPasswordResponse.success match {
+          case true =>
+            val token: String = generateToken
+            val tmSessionRow: TmSessionRow = TmSessionRow(token, TokenHelper.generate8HexToken, 0, request.clientId.toByte, memberResponse.memberId, request.identity, identityType(request.identity), IPv4Helper.ipToLong(request.ip), request.deviceType.toByte, request.deviceIdentity, request.lat, request.lng,
+              Some(request.country), Some(request.province), Some(request.city), Some(request.county), Some(request.address), new Timestamp(System.currentTimeMillis()))
+            saveCache(token, new SessionCache(tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime))
+            sessionRepository.createSession(tmSessionRow)
+            new SessionResponse(true, 0, tmSessionRow.token, tmSessionRow.salt, tmSessionRow.clientId.toInt, tmSessionRow.memberId, tmSessionRow.status, tmSessionRow.gmtCreate.getTime, tmSessionRow.gmtCreate.getTime)
+          case false =>
+            logger.info("invalid username or password.")
+            errorResponse(ErrorCode.EC_UC_MEMBER_INVALID_USERNAME_OR_PWD)
         }
+      case _ =>
+        errorResponse(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE)
     }
   }
 
@@ -113,8 +134,10 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     new StringBuilder(REPELLED_TOKEN_PRE).append(token).toString()
   }
 
-  def identityType(memberResponse: MemberResponse, identity: String): Byte = {
-    memberResponse.identityList.filter(_.identity == identity).head.pid.toByte
+  def identityType(identity: String): Byte = {
+    if (RegHelper.isMobile(identity)) 1.toByte
+    else if (RegHelper.isMobile(identity)) 2.toByte
+    else 0.toByte
   }
 
   def generateToken: String = {
