@@ -35,7 +35,7 @@ trait SessionService {
 class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisClientTemplate: RedisClientTemplate, memberClientService: MemberClientService) extends SessionService {
   val logger: Logger = LoggerFactory.getLogger(getClass)
   implicit val timeout = (90 seconds)
-  val sessionExpireSeconds: Int = 8 * 60 * 60
+  val sessionExpireSeconds: Int = 90 * 24 * 60 * 60
   val repelledTokenExpireSeconds: Int = 60 * 60
   val TOKEN_SESSION_PRE = "sso:tk-s:"
   val TOKEN_SALT_PRE = "sso:tk-slt:"
@@ -178,10 +178,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
   override def touch(traceId: String, token: String): SessionResponse = {
     val sessionCacheKey: String = generateTokenSessionCacheKey(token)
     redisClientTemplate.get[SessionCache](sessionCacheKey, classOf[SessionCache]) match {
-      case Some(sessionCache) =>
-        sessionCache.lastAccessTime = System.currentTimeMillis()
-        redisClientTemplate.set(sessionCacheKey, sessionCache, sessionExpireSeconds)
-        sessionCache
+      case Some(sessionCache) => sessionCache
       case None =>
         redisClientTemplate.getString(generateRepelledTokenCacheKey(token)) match {
           case Some(v) => errorResponse(ErrorCode.EC_SSO_SESSION_REPELLED)
