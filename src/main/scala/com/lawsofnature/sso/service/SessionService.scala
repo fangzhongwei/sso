@@ -48,7 +48,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     * @return
     */
   override def createSession(traceId: String, request: CreateSessionRequest): SessionResponse = {
-    val memberResponse: MemberResponse = memberClientService.getMemberByMobile(traceId, request.identityTicket)
+    val memberResponse: MemberResponse = memberClientService.getMemberById(traceId, request.memberId)
     memberResponse.code match {
       case "0" => checkAndResponse(traceId, request, memberResponse)
       case _ => throw ServiceException.make(ErrorCode.get(memberResponse.code))
