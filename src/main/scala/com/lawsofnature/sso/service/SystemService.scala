@@ -13,7 +13,7 @@ import com.lawsofnature.sso.repo.{SessionRepository, SessionRepositoryImpl}
 
 object SystemService extends App {
 
-  private val injector = Guice.createInjector(new AbstractModule() {
+  private[this] val injector = Guice.createInjector(new AbstractModule() {
     override def configure() {
       val map: util.HashMap[String, String] = ConfigHelper.configMap
       Names.bindProperties(binder(), map)

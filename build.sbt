@@ -21,3 +21,5 @@ libraryDependencies += "com.lawsofnature.client" % "ssoclient_2.11" % "1.0"
 libraryDependencies += "com.lawsofnature.common" % "common-error_2.11" % "1.0"
 libraryDependencies += "com.lawsofnature.common" % "common-utils_2.11" % "1.0"
 libraryDependencies += "com.lawsofnature.common" % "common-redis_2.11" % "1.0"
+
+libraryDependencies += "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.5.46"

@@ -1,8 +1,12 @@
 package com.lawsofnature.sso.repo
 
-import com.lawsofnature.connection.{DBComponent, MySQLDBImpl}
+import java.sql.Timestamp
 
-import scala.concurrent.Future
+import com.lawsofnature.connection.{DBComponent, MySQLDBImpl}
+import com.lawsofnature.sso.domain.cache.session.SessionCache
+
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, Future}
 
 /**
   * Created by fangzhongwei on 2016/11/23.
@@ -12,12 +16,23 @@ trait SessionRepository extends Tables {
 
   import profile.api._
 
-  def createSession(tmSessionRow: TmSessionRow): Future[Int] = db.run {
-    TmSession += tmSessionRow
+  implicit def cacheToRaw(s: SessionCache): TmSessionRow = {
+    TmSessionRow(s.token, s.clientId.toByte, s.ip, s.deviceType.toByte, s.fingerPrint, s.status.toByte, s.memberId, s.identity, s.identityTicket, new Timestamp(s.gmtCreate), new Timestamp(s.gmtCreate))
   }
 
-  def selectSessionByToken(token: String): Future[Option[TmSessionRow]] = db.run {
+  implicit def rawToCache(s: TmSessionRow): SessionCache = {
+    SessionCache(s.token, s.clientId, s.ip, s.deviceType, s.fingerPrint, s.status, s.memberId, s.identity, s.identityTicket, s.gmtCreate.getTime)
+  }
+
+  def createSession(sessionCache: SessionCache): Future[Int] = db.run {
+    TmSession += sessionCache
+  }
+
+  def selectSessionByToken(token: String): Option[SessionCache] = Await.result(db.run {
     TmSession.filter(_.token === token).result.headOption
+  }, Duration.Inf) match {
+    case Some(session) => Some(session)
+    case None => None
   }
 
   def updateSession(token: String, status: Byte): Unit = db.run {
@@ -26,10 +41,10 @@ trait SessionRepository extends Tables {
 
   var i = -1
 
-  def getNextSessionId(): Future[Seq[(Long)]] = {
+  def getNextSessionId(): Long = {
     i = i + 1
     val sequenceName = "session_id_" + (i % 5)
-    db.run(sql"""select nextval($sequenceName)""".as[(Long)])
+    Await.result(db.run(sql"""select nextval($sequenceName)""".as[(Long)]), Duration.Inf).head
   }
 }
 
