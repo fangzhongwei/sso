@@ -15,7 +15,7 @@ class SessionServiceEndpointImpl @Inject()(sessionService: SessionService) exten
 
   private[this] val ERROR_RESPONSE_MAP: scala.collection.mutable.Map[ErrorCode, SessionResponse] = scala.collection.mutable.Map[ErrorCode, SessionResponse]()
 
-  override def login(traceId: String, request: CreateSessionRequest, current: Current): SessionResponse = {
+  override def createSession(traceId: String, request: CreateSessionRequest, current: Current): SessionResponse = {
     try {
       sessionService.createSession(traceId, request)
     } catch {
