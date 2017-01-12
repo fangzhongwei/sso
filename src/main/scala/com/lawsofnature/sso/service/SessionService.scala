@@ -59,6 +59,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
     m.status match {
       case -1 => throw ServiceException.make(ErrorCode.EC_UC_MEMBER_ACCOUNT_FREEZE)
       case _ =>
+        if (0 == m.status) memberClientService.updateMemberStatus(traceId, m.memberId, 1)
         val token: String = generateToken
         val sessionCache: SessionCache = SessionCache(token, r.clientId, r.ip, r.deviceType, r.fingerPrint, 0, m.memberId, m.mobile, m.mobileTicket, System.currentTimeMillis())
         saveCache(token, sessionCache)
@@ -146,7 +147,14 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
       }
       case None => redisClientTemplate.getString(generateRepelledTokenCacheKey(token)) match {
         case Some(v) => errorResponse(ErrorCode.EC_SSO_SESSION_REPELLED)
-        case None => errorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED)
+        case None =>
+          sessionRepository.selectSessionByToken(token) match {
+            case Some(sessionCache) =>
+              saveCache(token, sessionCache)
+              sessionCache
+            case None => errorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED)
+          }
+
       }
     }
   }
