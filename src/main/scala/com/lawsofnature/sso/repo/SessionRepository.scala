@@ -17,11 +17,11 @@ trait SessionRepository extends Tables {
   import profile.api._
 
   implicit def cacheToRaw(s: SessionCache): TmSessionRow = {
-    TmSessionRow(s.token, s.clientId.toByte, s.ip, s.deviceType.toByte, s.fingerPrint, s.status.toByte, s.memberId, s.identity, s.identityTicket, new Timestamp(s.gmtCreate), new Timestamp(s.gmtCreate))
+    TmSessionRow(s.token, s.clientId.toByte, s.version, s.ip, s.deviceType.toByte, s.fingerPrint, s.status.toByte, s.memberId, s.identity, s.identityTicket, new Timestamp(s.gmtCreate), new Timestamp(s.gmtCreate))
   }
 
   implicit def rawToCache(s: TmSessionRow): SessionCache = {
-    SessionCache(s.token, s.clientId, s.ip, s.deviceType, s.fingerPrint, s.status, s.memberId, s.identity, s.identityTicket, s.gmtCreate.getTime)
+    SessionCache(s.token, s.clientId, s.version, s.ip, s.deviceType, s.fingerPrint, s.status, s.memberId, s.identity, s.identityTicket, s.gmtCreate.getTime)
   }
 
   def createSession(sessionCache: SessionCache): Future[Int] = db.run {

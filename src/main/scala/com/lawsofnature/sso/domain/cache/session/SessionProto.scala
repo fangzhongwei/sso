@@ -9,11 +9,12 @@ object SessionProto {
   lazy val descriptor: com.google.protobuf.Descriptors.FileDescriptor = {
     val proto = com.google.protobuf.DescriptorProtos.FileDescriptorProto.parseFrom(
       com.trueaccord.scalapb.Encoding.fromBase64(scala.collection.Seq(
-        """Cg1zZXNzaW9uLnByb3RvIqgCCgxTZXNzaW9uQ2FjaGUSFAoFdG9rZW4YASABKAlSBXRva2VuEhoKCGNsaWVudElkGAIgASgFU
-  ghjbGllbnRJZBIOCgJpcBgDIAEoA1ICaXASHgoKZGV2aWNlVHlwZRgEIAEoBVIKZGV2aWNlVHlwZRIgCgtmaW5nZXJQcmludBgFI
-  AEoCVILZmluZ2VyUHJpbnQSFgoGc3RhdHVzGAYgASgFUgZzdGF0dXMSGgoIbWVtYmVySWQYByABKANSCG1lbWJlcklkEhoKCGlkZ
-  W50aXR5GAggASgJUghpZGVudGl0eRImCg5pZGVudGl0eVRpY2tldBgJIAEoCVIOaWRlbnRpdHlUaWNrZXQSHAoJZ210Q3JlYXRlG
-  AogASgDUglnbXRDcmVhdGVCIwohY29tLmxhd3NvZm5hdHVyZS5zc28uZG9tYWluLmNhY2hlYgZwcm90bzM="""
+  """Cg1zZXNzaW9uLnByb3RvIsICCgxTZXNzaW9uQ2FjaGUSFAoFdG9rZW4YASABKAlSBXRva2VuEhoKCGNsaWVudElkGAIgASgFU
+  ghjbGllbnRJZBIYCgd2ZXJzaW9uGAMgASgJUgd2ZXJzaW9uEg4KAmlwGAQgASgDUgJpcBIeCgpkZXZpY2VUeXBlGAUgASgFUgpkZ
+  XZpY2VUeXBlEiAKC2ZpbmdlclByaW50GAYgASgJUgtmaW5nZXJQcmludBIWCgZzdGF0dXMYByABKAVSBnN0YXR1cxIaCghtZW1iZ
+  XJJZBgIIAEoA1IIbWVtYmVySWQSGgoIaWRlbnRpdHkYCSABKAlSCGlkZW50aXR5EiYKDmlkZW50aXR5VGlja2V0GAogASgJUg5pZ
+  GVudGl0eVRpY2tldBIcCglnbXRDcmVhdGUYCyABKANSCWdtdENyZWF0ZUIjCiFjb20ubGF3c29mbmF0dXJlLnNzby5kb21haW4uY
+  2FjaGViBnByb3RvMw=="""
       ).mkString))
     com.google.protobuf.Descriptors.FileDescriptor.buildFrom(proto, Array(
     ))

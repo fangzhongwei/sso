@@ -27,7 +27,7 @@ trait SessionService {
   def touch(traceId: String, token: String): SessionResponse
 
   implicit def sessionCache2Response(s: SessionCache): SessionResponse = {
-    new SessionResponse("0", s.clientId, s.ip, s.deviceType, s.fingerPrint, s.token, s.status, s.memberId, s.identity, s.identityTicket, s.gmtCreate, s.gmtCreate)
+    new SessionResponse("0", s.clientId, s.version, s.ip, s.deviceType, s.fingerPrint, s.token, s.status, s.memberId, s.identity, s.identityTicket, s.gmtCreate, s.gmtCreate)
   }
 }
 
@@ -35,7 +35,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
   private[this] val logger: Logger = LoggerFactory.getLogger(getClass)
   private[this] val sessionExpireSeconds: Int = 365 * 24 * 60 * 60
   private[this] val repelledTokenExpireSeconds: Int = 24 * 60 * 60
-  private[this]  val TOKEN_SESSION_PRE = "sso:tk-s:"
+  private[this] val TOKEN_SESSION_PRE = "sso:tk-s:"
   private[this] val TOKEN_SALT_PRE = "sso:tk-slt:"
   private[this] val MEMBER_ID_TOKEN_PRE = "sso:mi-tk:"
   private[this] val REPELLED_TOKEN_PRE = "sso:rptk:"
@@ -61,7 +61,7 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
       case _ =>
         if (0 == m.status) memberClientService.updateMemberStatus(traceId, m.memberId, 1)
         val token: String = generateToken
-        val sessionCache: SessionCache = SessionCache(token, r.clientId, r.ip, r.deviceType, r.fingerPrint, 0, m.memberId, m.mobile, m.mobileTicket, System.currentTimeMillis())
+        val sessionCache: SessionCache = SessionCache(token, r.clientId, r.version, r.ip, r.deviceType, r.fingerPrint, 0, m.memberId, m.mobile, m.mobileTicket, System.currentTimeMillis())
         saveCache(token, sessionCache)
         sessionRepository.createSession(sessionCache)
         sessionCache
@@ -150,11 +150,11 @@ class SessionServiceImpl @Inject()(sessionRepository: SessionRepository, redisCl
         case None =>
           sessionRepository.selectSessionByToken(token) match {
             case Some(sessionCache) =>
+              if (sessionCache.status == 99.toByte) throw ServiceException.make(ErrorCode.EC_SSO_SESSION_EXPIRED)
               saveCache(token, sessionCache)
               sessionCache
             case None => errorResponse(ErrorCode.EC_SSO_SESSION_EXPIRED)
           }
-
       }
     }
   }

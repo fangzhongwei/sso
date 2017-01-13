@@ -9,6 +9,7 @@ package com.lawsofnature.sso.domain.cache.session
 final case class SessionCache(
                                token: String = "",
                                clientId: Int = 0,
+                               version: String = "",
                                ip: Long = 0L,
                                deviceType: Int = 0,
                                fingerPrint: String = "",
@@ -29,29 +30,32 @@ final case class SessionCache(
     if (clientId != 0) {
       __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(2, clientId)
     }
+    if (version != "") {
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(3, version)
+    }
     if (ip != 0L) {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(3, ip)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(4, ip)
     }
     if (deviceType != 0) {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(4, deviceType)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(5, deviceType)
     }
     if (fingerPrint != "") {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(5, fingerPrint)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(6, fingerPrint)
     }
     if (status != 0) {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(6, status)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(7, status)
     }
     if (memberId != 0L) {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(7, memberId)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(8, memberId)
     }
     if (identity != "") {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(8, identity)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(9, identity)
     }
     if (identityTicket != "") {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(9, identityTicket)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(10, identityTicket)
     }
     if (gmtCreate != 0L) {
-      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(10, gmtCreate)
+      __size += _root_.com.google.protobuf.CodedOutputStream.computeInt64Size(11, gmtCreate)
     }
     __size
   }
@@ -79,51 +83,57 @@ final case class SessionCache(
       }
     };
     {
+      val __v = version
+      if (__v != "") {
+        _output__.writeString(3, __v)
+      }
+    };
+    {
       val __v = ip
       if (__v != 0L) {
-        _output__.writeInt64(3, __v)
+        _output__.writeInt64(4, __v)
       }
     };
     {
       val __v = deviceType
       if (__v != 0) {
-        _output__.writeInt32(4, __v)
+        _output__.writeInt32(5, __v)
       }
     };
     {
       val __v = fingerPrint
       if (__v != "") {
-        _output__.writeString(5, __v)
+        _output__.writeString(6, __v)
       }
     };
     {
       val __v = status
       if (__v != 0) {
-        _output__.writeInt32(6, __v)
+        _output__.writeInt32(7, __v)
       }
     };
     {
       val __v = memberId
       if (__v != 0L) {
-        _output__.writeInt64(7, __v)
+        _output__.writeInt64(8, __v)
       }
     };
     {
       val __v = identity
       if (__v != "") {
-        _output__.writeString(8, __v)
+        _output__.writeString(9, __v)
       }
     };
     {
       val __v = identityTicket
       if (__v != "") {
-        _output__.writeString(9, __v)
+        _output__.writeString(10, __v)
       }
     };
     {
       val __v = gmtCreate
       if (__v != 0L) {
-        _output__.writeInt64(10, __v)
+        _output__.writeInt64(11, __v)
       }
     };
   }
@@ -131,6 +141,7 @@ final case class SessionCache(
   def mergeFrom(`_input__`: _root_.com.google.protobuf.CodedInputStream): com.lawsofnature.sso.domain.cache.session.SessionCache = {
     var __token = this.token
     var __clientId = this.clientId
+    var __version = this.version
     var __ip = this.ip
     var __deviceType = this.deviceType
     var __fingerPrint = this.fingerPrint
@@ -148,21 +159,23 @@ final case class SessionCache(
           __token = _input__.readString()
         case 16 =>
           __clientId = _input__.readInt32()
-        case 24 =>
-          __ip = _input__.readInt64()
+        case 26 =>
+          __version = _input__.readString()
         case 32 =>
+          __ip = _input__.readInt64()
+        case 40 =>
           __deviceType = _input__.readInt32()
-        case 42 =>
+        case 50 =>
           __fingerPrint = _input__.readString()
-        case 48 =>
-          __status = _input__.readInt32()
         case 56 =>
+          __status = _input__.readInt32()
+        case 64 =>
           __memberId = _input__.readInt64()
-        case 66 =>
-          __identity = _input__.readString()
         case 74 =>
+          __identity = _input__.readString()
+        case 82 =>
           __identityTicket = _input__.readString()
-        case 80 =>
+        case 88 =>
           __gmtCreate = _input__.readInt64()
         case tag => _input__.skipField(tag)
       }
@@ -170,6 +183,7 @@ final case class SessionCache(
     com.lawsofnature.sso.domain.cache.session.SessionCache(
       token = __token,
       clientId = __clientId,
+      version = __version,
       ip = __ip,
       deviceType = __deviceType,
       fingerPrint = __fingerPrint,
@@ -184,6 +198,8 @@ final case class SessionCache(
   def withToken(__v: String): SessionCache = copy(token = __v)
 
   def withClientId(__v: Int): SessionCache = copy(clientId = __v)
+
+  def withVersion(__v: String): SessionCache = copy(version = __v)
 
   def withIp(__v: Long): SessionCache = copy(ip = __v)
 
@@ -212,34 +228,38 @@ final case class SessionCache(
         if (__t != 0) __t else null
       }
       case 3 => {
+        val __t = version
+        if (__t != "") __t else null
+      }
+      case 4 => {
         val __t = ip
         if (__t != 0L) __t else null
       }
-      case 4 => {
+      case 5 => {
         val __t = deviceType
         if (__t != 0) __t else null
       }
-      case 5 => {
+      case 6 => {
         val __t = fingerPrint
         if (__t != "") __t else null
       }
-      case 6 => {
+      case 7 => {
         val __t = status
         if (__t != 0) __t else null
       }
-      case 7 => {
+      case 8 => {
         val __t = memberId
         if (__t != 0L) __t else null
       }
-      case 8 => {
+      case 9 => {
         val __t = identity
         if (__t != "") __t else null
       }
-      case 9 => {
+      case 10 => {
         val __t = identityTicket
         if (__t != "") __t else null
       }
-      case 10 => {
+      case 11 => {
         val __t = gmtCreate
         if (__t != 0L) __t else null
       }
@@ -260,14 +280,15 @@ object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com
     com.lawsofnature.sso.domain.cache.session.SessionCache(
       __fieldsMap.getOrElse(__fields.get(0), "").asInstanceOf[String],
       __fieldsMap.getOrElse(__fields.get(1), 0).asInstanceOf[Int],
-      __fieldsMap.getOrElse(__fields.get(2), 0L).asInstanceOf[Long],
-      __fieldsMap.getOrElse(__fields.get(3), 0).asInstanceOf[Int],
-      __fieldsMap.getOrElse(__fields.get(4), "").asInstanceOf[String],
-      __fieldsMap.getOrElse(__fields.get(5), 0).asInstanceOf[Int],
-      __fieldsMap.getOrElse(__fields.get(6), 0L).asInstanceOf[Long],
-      __fieldsMap.getOrElse(__fields.get(7), "").asInstanceOf[String],
+      __fieldsMap.getOrElse(__fields.get(2), "").asInstanceOf[String],
+      __fieldsMap.getOrElse(__fields.get(3), 0L).asInstanceOf[Long],
+      __fieldsMap.getOrElse(__fields.get(4), 0).asInstanceOf[Int],
+      __fieldsMap.getOrElse(__fields.get(5), "").asInstanceOf[String],
+      __fieldsMap.getOrElse(__fields.get(6), 0).asInstanceOf[Int],
+      __fieldsMap.getOrElse(__fields.get(7), 0L).asInstanceOf[Long],
       __fieldsMap.getOrElse(__fields.get(8), "").asInstanceOf[String],
-      __fieldsMap.getOrElse(__fields.get(9), 0L).asInstanceOf[Long]
+      __fieldsMap.getOrElse(__fields.get(9), "").asInstanceOf[String],
+      __fieldsMap.getOrElse(__fields.get(10), 0L).asInstanceOf[Long]
     )
   }
 
@@ -284,6 +305,8 @@ object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com
     def token: _root_.com.trueaccord.lenses.Lens[UpperPB, String] = field(_.token)((c_, f_) => c_.copy(token = f_))
 
     def clientId: _root_.com.trueaccord.lenses.Lens[UpperPB, Int] = field(_.clientId)((c_, f_) => c_.copy(clientId = f_))
+
+    def version: _root_.com.trueaccord.lenses.Lens[UpperPB, String] = field(_.version)((c_, f_) => c_.copy(version = f_))
 
     def ip: _root_.com.trueaccord.lenses.Lens[UpperPB, Long] = field(_.ip)((c_, f_) => c_.copy(ip = f_))
 
@@ -304,12 +327,13 @@ object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com
 
   final val TOKEN_FIELD_NUMBER = 1
   final val CLIENTID_FIELD_NUMBER = 2
-  final val IP_FIELD_NUMBER = 3
-  final val DEVICETYPE_FIELD_NUMBER = 4
-  final val FINGERPRINT_FIELD_NUMBER = 5
-  final val STATUS_FIELD_NUMBER = 6
-  final val MEMBERID_FIELD_NUMBER = 7
-  final val IDENTITY_FIELD_NUMBER = 8
-  final val IDENTITYTICKET_FIELD_NUMBER = 9
-  final val GMTCREATE_FIELD_NUMBER = 10
+  final val VERSION_FIELD_NUMBER = 3
+  final val IP_FIELD_NUMBER = 4
+  final val DEVICETYPE_FIELD_NUMBER = 5
+  final val FINGERPRINT_FIELD_NUMBER = 6
+  final val STATUS_FIELD_NUMBER = 7
+  final val MEMBERID_FIELD_NUMBER = 8
+  final val IDENTITY_FIELD_NUMBER = 9
+  final val IDENTITYTICKET_FIELD_NUMBER = 10
+  final val GMTCREATE_FIELD_NUMBER = 11
 }
