@@ -1,25 +1,34 @@
-name := """sso"""
-
-version := "1.0"
-
-scalaVersion := "2.11.8"
-
-
-libraryDependencies ++= Seq(
-  "commons-lang" % "commons-lang" % "2.6",
-  "com.zeroc" % "ice" % "3.6.2",
-  "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.4",
-  "com.typesafe.slick" % "slick-codegen_2.11" % "3.2.0-M1" % "test"
+lazy val commonSettings = Seq(
+  javacOptions ++= Seq("-encoding", "UTF-8"),
+  organization := "com.jxjxgo.sso",
+  version := "1.0",
+  scalaVersion := "2.11.8",
+  libraryDependencies ++= Seq(
+    "net.codingwell" % "scala-guice_2.11" % "4.1.0",
+    "org.scala-lang" % "scala-library" % "2.11.8",
+    "com.jxjxgo.common" % "common-finagle-thrift_2.11" % "1.0"
+  )
 )
 
-libraryDependencies += "com.lawsofnature.common" % "common-mysql_2.11" % "1.0"
-libraryDependencies += "com.lawsofnature.common" % "common-ice_2.11" % "1.0"
+lazy val ssocommonlib = (project in file("ssocommonlib")).settings(commonSettings: _*).settings(
+  name := """ssocommonlib""",
+  libraryDependencies ++= Seq(
+  )
+)
 
-libraryDependencies += "com.lawsofnature.member" % "memberclient_2.11" % "1.0-SNAPSHOT"
-libraryDependencies += "com.lawsofnature.client" % "ssoclient_2.11" % "1.0"
+lazy val ssoserver = (project in file("ssoserver")).settings(commonSettings: _*).settings(
+  name := """ssoserver""",
+  libraryDependencies ++= Seq(
+    "commons-lang" % "commons-lang" % "2.6",
+    "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.4",
+    "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.5.46",
 
-libraryDependencies += "com.lawsofnature.common" % "common-error_2.11" % "1.0"
-libraryDependencies += "com.lawsofnature.common" % "common-utils_2.11" % "1.0"
-libraryDependencies += "com.lawsofnature.common" % "common-redis_2.11" % "1.0"
+    "com.jxjxgo.common" % "common-mysql_2.11" % "1.0",
+    "com.jxjxgo.common" % "common-error_2.11" % "1.0",
+    "com.jxjxgo.common" % "common-redis_2.11" % "1.0",
 
-libraryDependencies += "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.5.46"
+    "com.jxjxgo.common" % "common-utils_2.11" % "1.0",
+    "com.jxjxgo.sso" % "ssocommonlib_2.11" % "1.0",
+    "com.jxjxgo.member" % "membercommonlib_2.11" % "1.0"
+  )
+)
