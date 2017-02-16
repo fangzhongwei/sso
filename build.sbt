@@ -23,7 +23,7 @@ lazy val ssoserver = (project in file("ssoserver")).settings(commonSettings: _*)
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.4",
     "com.trueaccord.scalapb" % "scalapb-runtime_2.11" % "0.5.46",
 
-    "com.jxjxgo.common" % "common-mysql_2.11" % "1.0",
+    "com.jxjxgo.common" % "common-db_2.11" % "1.0",
     "com.jxjxgo.common" % "common-error_2.11" % "1.0",
     "com.jxjxgo.common" % "common-redis_2.11" % "1.0",
 

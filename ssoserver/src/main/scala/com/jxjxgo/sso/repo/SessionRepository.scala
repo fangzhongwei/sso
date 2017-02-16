@@ -2,7 +2,8 @@ package com.lawsofnature.sso.repo
 
 import java.sql.Timestamp
 
-import com.jxjxgo.mysql.connection.{DBComponent, MySQLDBImpl}
+import com.jxjxgo.mysql.connection.{DBComponent, DBImpl}
+import com.jxjxgo.sso.repo.Tables
 import com.lawsofnature.sso.domain.cache.session.SessionCache
 
 import scala.concurrent.duration.Duration
@@ -39,13 +40,9 @@ trait SessionRepository extends Tables {
     TmSession.filter(_.token === token).map(s => s.status).update(status)
   }
 
-  var i = -1
-
   def getNextSessionId(): Long = {
-    i = i + 1
-    val sequenceName = "session_id_" + (i % 5)
-    Await.result(db.run(sql"""select nextval($sequenceName)""".as[(Long)]), Duration.Inf).head
+    Await.result(db.run(sql"""select nextval('seq_session_id')""".as[(Long)]), Duration.Inf).head
   }
 }
 
-class SessionRepositoryImpl extends SessionRepository with MySQLDBImpl
+class SessionRepositoryImpl extends SessionRepository with DBImpl
