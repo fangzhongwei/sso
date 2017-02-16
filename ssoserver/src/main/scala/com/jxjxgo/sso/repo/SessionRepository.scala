@@ -2,7 +2,7 @@ package com.lawsofnature.sso.repo
 
 import java.sql.Timestamp
 
-import com.jxjxgo.mysql.connection.{DBComponent, DBImpl}
+import com.jxjxgo.mysql.connection.DBComponent
 import com.jxjxgo.sso.repo.Tables
 import com.lawsofnature.sso.domain.cache.session.SessionCache
 
@@ -45,4 +45,4 @@ trait SessionRepository extends Tables {
   }
 }
 
-class SessionRepositoryImpl extends SessionRepository with DBImpl
+class SessionRepositoryImpl extends SessionRepository with DBComponent
