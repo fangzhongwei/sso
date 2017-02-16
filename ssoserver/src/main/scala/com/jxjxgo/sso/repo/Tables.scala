@@ -10,12 +10,6 @@ trait Tables extends DBImpl {
   // NOTE: GetResult mappers for plain SQL are only generated for tables where Slick knows how to map the types of all columns.
   import slick.jdbc.{GetResult => GR}
 
-  /** DDL for all tables. Call .create to execute. */
-  lazy val schema: profile.SchemaDescription = TmSession.schema
-
-  @deprecated("Use .schema instead of .ddl", "3.0")
-  def ddl = schema
-
   /** Entity class storing rows of table TmSession
     *
     * @param token          Database column token SqlType(varchar), PrimaryKey, Length(32,true)
