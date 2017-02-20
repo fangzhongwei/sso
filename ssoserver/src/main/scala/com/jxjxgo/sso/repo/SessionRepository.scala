@@ -37,7 +37,7 @@ trait SessionRepository extends Tables {
   }
 
   def updateSession(token: String, status: Byte): Unit = db.run {
-    TmSession.filter(_.token === token).map(s => s.status).update(status)
+    TmSession.filter(_.token === token).map(s => (s.status, s.gmtUpdate)).update(status, new java.sql.Timestamp(System.currentTimeMillis()))
   }
 
   def getNextSessionId(): Long = {
