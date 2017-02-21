@@ -18,7 +18,7 @@ lazy val ssocommonlib = (project in file("ssocommonlib")).settings(commonSetting
 
 lazy val ssoserver = (project in file("ssoserver")).settings(commonSettings: _*).settings(
   name := """ssoserver""",
-  mainClass in (Compile, run) := Some("com.lawsofnature.sso.service.SystemService"),
+  mainClass in (Compile, run) := Some("com.jxjxgo.sso.service.SystemService"),
   libraryDependencies ++= Seq(
     "commons-lang" % "commons-lang" % "2.6",
     "com.fasterxml.jackson.module" % "jackson-module-scala_2.11" % "2.8.4",

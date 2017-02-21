@@ -1,10 +1,10 @@
-package com.lawsofnature.sso.repo
+package com.jxjxgo.sso.repo
 
 import java.sql.Timestamp
 
 import com.jxjxgo.mysql.connection.DBComponent
 import com.jxjxgo.sso.repo.Tables
-import com.lawsofnature.sso.domain.cache.session.SessionCache
+import com.jxjxgo.sso.domain.cache.session.SessionCache
 
 import scala.concurrent.duration.Duration
 import scala.concurrent.{Await, Future}

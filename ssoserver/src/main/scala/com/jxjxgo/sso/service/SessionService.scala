@@ -1,4 +1,4 @@
-package com.lawsofnature.sso.service
+package com.jxjxgo.sso.service
 
 import java.nio.charset.StandardCharsets
 import javax.inject.Inject
@@ -8,8 +8,8 @@ import com.jxjxgo.common.helper.{RegHelper, TokenHelper}
 import com.jxjxgo.common.redis.RedisClientTemplate
 import com.jxjxgo.memberber.rpc.domain.{MemberEndpoint, MemberResponse}
 import com.jxjxgo.sso.rpc.domain.{CreateSessionRequest, SSOBaseResponse, SessionResponse}
-import com.lawsofnature.sso.domain.cache.session.SessionCache
-import com.lawsofnature.sso.repo.SessionRepository
+import com.jxjxgo.sso.domain.cache.session.SessionCache
+import com.jxjxgo.sso.repo.SessionRepository
 import com.twitter.util.{Await, Future}
 import org.slf4j.{Logger, LoggerFactory}
 

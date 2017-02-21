@@ -3,7 +3,7 @@
 //
 // Protofile syntax: PROTO3
 
-package com.lawsofnature.sso.domain.cache.session
+package com.jxjxgo.sso.domain.cache.session
 
 object SessionProto {
   lazy val descriptor: com.google.protobuf.Descriptors.FileDescriptor = {

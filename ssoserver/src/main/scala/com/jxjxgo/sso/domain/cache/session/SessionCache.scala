@@ -3,7 +3,7 @@
 //
 // Protofile syntax: PROTO3
 
-package com.lawsofnature.sso.domain.cache.session
+package com.jxjxgo.sso.domain.cache.session
 
 @SerialVersionUID(0L)
 final case class SessionCache(
@@ -138,7 +138,7 @@ final case class SessionCache(
     };
   }
 
-  def mergeFrom(`_input__`: _root_.com.google.protobuf.CodedInputStream): com.lawsofnature.sso.domain.cache.session.SessionCache = {
+  def mergeFrom(`_input__`: _root_.com.google.protobuf.CodedInputStream): com.jxjxgo.sso.domain.cache.session.SessionCache = {
     var __token = this.token
     var __clientId = this.clientId
     var __version = this.version
@@ -180,7 +180,7 @@ final case class SessionCache(
         case tag => _input__.skipField(tag)
       }
     }
-    com.lawsofnature.sso.domain.cache.session.SessionCache(
+    com.jxjxgo.sso.domain.cache.session.SessionCache(
       token = __token,
       clientId = __clientId,
       version = __version,
@@ -268,16 +268,16 @@ final case class SessionCache(
 
   override def toString: String = _root_.com.trueaccord.scalapb.TextFormat.printToUnicodeString(this)
 
-  def companion = com.lawsofnature.sso.domain.cache.session.SessionCache
+  def companion = com.jxjxgo.sso.domain.cache.session.SessionCache
 }
 
-object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com.lawsofnature.sso.domain.cache.session.SessionCache] {
-  implicit def messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[com.lawsofnature.sso.domain.cache.session.SessionCache] = this
+object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com.jxjxgo.sso.domain.cache.session.SessionCache] {
+  implicit def messageCompanion: com.trueaccord.scalapb.GeneratedMessageCompanion[com.jxjxgo.sso.domain.cache.session.SessionCache] = this
 
-  def fromFieldsMap(__fieldsMap: scala.collection.immutable.Map[_root_.com.google.protobuf.Descriptors.FieldDescriptor, scala.Any]): com.lawsofnature.sso.domain.cache.session.SessionCache = {
+  def fromFieldsMap(__fieldsMap: scala.collection.immutable.Map[_root_.com.google.protobuf.Descriptors.FieldDescriptor, scala.Any]): com.jxjxgo.sso.domain.cache.session.SessionCache = {
     require(__fieldsMap.keys.forall(_.getContainingType() == descriptor), "FieldDescriptor does not match message type.")
     val __fields = descriptor.getFields
-    com.lawsofnature.sso.domain.cache.session.SessionCache(
+    com.jxjxgo.sso.domain.cache.session.SessionCache(
       __fieldsMap.getOrElse(__fields.get(0), "").asInstanceOf[String],
       __fieldsMap.getOrElse(__fields.get(1), 0).asInstanceOf[Int],
       __fieldsMap.getOrElse(__fields.get(2), "").asInstanceOf[String],
@@ -298,10 +298,10 @@ object SessionCache extends com.trueaccord.scalapb.GeneratedMessageCompanion[com
 
   def enumCompanionForField(__field: _root_.com.google.protobuf.Descriptors.FieldDescriptor): _root_.com.trueaccord.scalapb.GeneratedEnumCompanion[_] = throw new MatchError(__field)
 
-  lazy val defaultInstance = com.lawsofnature.sso.domain.cache.session.SessionCache(
+  lazy val defaultInstance = com.jxjxgo.sso.domain.cache.session.SessionCache(
   )
 
-  implicit class SessionCacheLens[UpperPB](_l: _root_.com.trueaccord.lenses.Lens[UpperPB, com.lawsofnature.sso.domain.cache.session.SessionCache]) extends _root_.com.trueaccord.lenses.ObjectLens[UpperPB, com.lawsofnature.sso.domain.cache.session.SessionCache](_l) {
+  implicit class SessionCacheLens[UpperPB](_l: _root_.com.trueaccord.lenses.Lens[UpperPB, com.jxjxgo.sso.domain.cache.session.SessionCache]) extends _root_.com.trueaccord.lenses.ObjectLens[UpperPB, com.jxjxgo.sso.domain.cache.session.SessionCache](_l) {
     def token: _root_.com.trueaccord.lenses.Lens[UpperPB, String] = field(_.token)((c_, f_) => c_.copy(token = f_))
 
     def clientId: _root_.com.trueaccord.lenses.Lens[UpperPB, Int] = field(_.clientId)((c_, f_) => c_.copy(clientId = f_))

@@ -1,4 +1,4 @@
-package com.lawsofnature.sso.service
+package com.jxjxgo.sso.service
 
 import javax.inject.Inject
 

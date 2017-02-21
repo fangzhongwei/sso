@@ -1,4 +1,4 @@
-package com.lawsofnature.sso.service
+package com.jxjxgo.sso.service
 
 import java.util
 
@@ -8,7 +8,7 @@ import com.jxjxgo.common.helper.ConfigHelper
 import com.jxjxgo.common.redis.{RedisClientTemplate, RedisClientTemplateImpl}
 import com.jxjxgo.memberber.rpc.domain.MemberEndpoint
 import com.jxjxgo.scrooge.thrift.template.{ScroogeThriftServerTemplate, ScroogeThriftServerTemplateImpl}
-import com.lawsofnature.sso.repo.{SessionRepository, SessionRepositoryImpl}
+import com.jxjxgo.sso.repo.{SessionRepository, SessionRepositoryImpl}
 import com.twitter.finagle.Thrift
 import com.twitter.scrooge.ThriftService
 import com.twitter.util.Future
